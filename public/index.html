@@ -1,0 +1,20 @@
+<html>
+  <head>
+    <title> PeerConnection </title>
+  </head>
+  <body>
+    <h1> Peer Connection </h1>
+    <input type='button' value='Call' id ='call' onclick='senderFlow()'/>
+    <input type='button' value='Recieve' id ='recieve' onclick='receiverFlow()'/>
+    <input type='button' value='Disconnect' id='disconnect' onclick="disconnectPeers()" disabled/>
+    <div>
+      <input name="myFile" type="file" disabled>
+      <!-- <input type='text' id='msgBox' placeholder="Enter your msg" disabled/> -->
+      <input type='button' value="Send" id='send' onclick="sendMsg()" disabled/>
+    <div>
+    <div id='displayMsg'></div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src='adapter.js'></script>
+    <script src='index.js'></script>
+  </body>
+</html>
