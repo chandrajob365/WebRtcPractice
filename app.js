@@ -14,7 +14,6 @@ io.on('connection', socket => {
   console.log('New connection : ', socket.id)
   socket.emit('created', socket.id)
   socket.on('message', message => {
-    console.log('[app.js] Client said : ', message)
     socket.broadcast.emit('message', message)
   })
 })
