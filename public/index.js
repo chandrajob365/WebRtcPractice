@@ -25,14 +25,17 @@ socket.on('created', clientId => {
 })
 
 function senderFlow () {
+  console.log('[senderFlow] Entry')
   recvBtn.style.display = 'none'
   msgReceiveBox.style.display = 'none'
   disconnectBtn.removeAttribute('disabled')
   handleSenderPeerConnection()
-  socket.on('message', message => {
-    console.log('[index.js] message from server : ', message)
-    messageHandler(message)
-  })
+  socket.on('message', handleSenderFlowMsg)
+}
+
+const handleSenderFlowMsg = message => {
+  console.log('[handleSenderFlowMsg] message from server : ', message)
+  messageHandler(message)
 }
 
 const handleSenderPeerConnection = () => {
@@ -76,6 +79,7 @@ const handleSendChannelStatusChage = event => {
     } else {
       resetConnection()
       resetView()
+      socket.removeEventListener('message', handleSenderFlowMsg)
     }
   }
 }
@@ -135,19 +139,24 @@ const handleNewIceCandidateMsg = (pc, candidate) => {
 
 // RecieverFlow //
 function receiverFlow () {
-  socket.on('message', message => {
-    console.log('[receiverFlow] pc = ', pc)
-    if (!pc) {
-      handleRecieverPeerConnection()
-    }
-    console.log('[index.js] message from server : ', message)
-    messageHandler(message)
-  })
+  console.log('[receiverFlow] Entry')
+  socket.on('message', handleRecieverFlowMsg)
   callBtn.style.display = 'none'
   msgInputBox.style.display = 'none'
   sendBtn.style.display = 'none'
+  msgReceiveBox.style.display = 'block'
   recvBtn.setAttribute('disabled', true)
   disconnectBtn.removeAttribute('disabled')
+}
+
+const handleRecieverFlowMsg = message => {
+  console.log('[handleReciverFlowMsg] pc = ', pc)
+  console.log('[handleReciverFlowMsg] message = ', message)
+  if (!pc) {
+    handleRecieverPeerConnection()
+  }
+  console.log('[handleReciverFlowMsg] message from server : ', message)
+  messageHandler(message)
 }
 
 const createPeerConnection = () => {
@@ -183,6 +192,7 @@ const handleReceiveChannelStatusChange = event => {
     if (state === 'closed') {
       resetConnection()
       resetView()
+      socket.removeEventListener('message', handleRecieverFlowMsg)
     }
   }
 }
@@ -200,8 +210,14 @@ const sendMsg = msg => {
 
 const disconnectPeers = () => {
   console.log('[disconnectPeers] Entry...')
-  if (senderDataChannel) senderDataChannel.close()
-  if (recieveDataChannel) recieveDataChannel.close()
+  if (senderDataChannel) {
+    senderDataChannel.close()
+    socket.removeEventListener('message', handleSenderFlowMsg)
+  }
+  if (recieveDataChannel) {
+    recieveDataChannel.close()
+    socket.removeEventListener('message', handleRecieverFlowMsg)
+  }
   resetConnection()
   resetView()
 }
